@@ -119,6 +119,7 @@ case "$1" in
 			fi
 
 			# Set memory information
+			SRV_JAVA_OPTS=`/bin/echo $SRV_JAVA_OPTS | /bin/sed -e "s/-Xms20m/-Xms${SYS_MEMORY}m/"`
 			SRV_JAVA_OPTS=`/bin/echo $SRV_JAVA_OPTS | /bin/sed -e "s/-Xmx1024m/-Xmx${SYS_MEMORY}m/"`
 
 			# Config IP from interface
@@ -129,6 +130,10 @@ case "$1" in
 			# Configure port on which service will listen for remote backups
 			REMOTE_PORT=`/bin/grep "<location>.*</location>" $QPKG_DIR/conf/my.service.xml | /bin/cut -f2 -d: | /bin/cut -f1 -d'<'`
 			/bin/sed -i "s/<location>.*<\/location>/<location>${SYS_IP}:${REMOTE_PORT}<\/location>/" $QPKG_DIR/conf/my.service.xml
+
+			# Avoid update / upgrade too quickly
+                        /bin/sed -i 's/<upgradePath>.*<\/upgradePath>/<upgradePath>\/dev\/null<\/upgradePath>/' $QPKG_DIR/conf/my.service.xml
+                        /bin/sed -i 's/<upgradeDelay>.*<\/upgradeDelay>/<upgradeDelay>150000000<\/upgradeDelay>/' $QPKG_DIR/conf/my.service.xml
 		fi
 
 		# Symlink identity and increment max_user_watches
